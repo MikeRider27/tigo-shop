@@ -1,0 +1,24 @@
+services:
+  cart-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:      
+        REACT_APP_AUTH_URL: ${REACT_APP_AUTH_URL}
+        REACT_APP_CATALOG_URL: ${REACT_APP_CATALOG_URL}
+        REACT_APP_CART_URL: ${REACT_APP_CART_URL}
+        REACT_APP_ORDER_URL: ${REACT_APP_ORDER_URL}
+    container_name: cart-app
+    restart: always
+    volumes:
+      - ./:/app
+    ports:
+      - "3000:3000"
+    networks:
+      - app
+    env_file:
+      - .env
+
+networks:
+  app:
+    driver: bridge
