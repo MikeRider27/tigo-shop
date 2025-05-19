@@ -10,7 +10,7 @@ const Home = () => {
     const token = localStorage.getItem("token");
 
     if (!token) {
-      navigate("/"); // Redirigir al login si no hay token
+      navigate("/");
       return;
     }
 
@@ -20,9 +20,7 @@ const Home = () => {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((res) => {
-        setUsuario(res.data);
-      })
+      .then((res) => setUsuario(res.data))
       .catch(() => {
         alert("Sesión expirada. Por favor inicia sesión nuevamente.");
         localStorage.removeItem("token");
@@ -31,57 +29,37 @@ const Home = () => {
   }, [navigate]);
 
   if (!usuario) {
-    return <p style={{ textAlign: "center", marginTop: "100px" }}>Cargando...</p>;
+    return <p style={styles.loading}>Cargando...</p>;
   }
 
   return (
     <div style={styles.container}>
-      <nav style={styles.navbar}>
-        <span style={styles.logo}>🏋️‍♂️ Tienda Deportiva</span>
-        <div>
-          <button style={styles.link} onClick={() => navigate("/catalog")}>Catálogo</button>
-          <button style={styles.link} onClick={() => navigate("/cart")}>Carrito</button>
-          <button style={styles.link} onClick={() => navigate("/orders")}>Órdenes</button>
-        </div>
-      </nav>
-
-      <div style={styles.content}>
-        <h1>Bienvenido, {usuario.nombres} {usuario.apellidos}</h1>
-        <p>Email: {usuario.email}</p>
-        <p>Dirección de envío: {usuario.direccionEnvio}</p>
-        <p>Fecha de nacimiento: {usuario.fechaNacimiento}</p>
-      </div>
+      <h2 style={styles.title}>Bienvenido, {usuario.nombres} {usuario.apellidos}</h2>
+      <p style={styles.text}><strong>Email:</strong> {usuario.email}</p>
+      <p style={styles.text}><strong>Dirección de envío:</strong> {usuario.direccionEnvio}</p>
+      <p style={styles.text}><strong>Fecha de nacimiento:</strong> {usuario.fechaNacimiento}</p>
     </div>
   );
 };
 
 const styles = {
+  loading: {
+    textAlign: "center",
+    marginTop: "100px",
+    fontSize: "1.1rem"
+  },
   container: {
-    fontFamily: "Arial, sans-serif",
-    padding: "20px"
+    textAlign: "center",
+    padding: "30px"
   },
-  navbar: {
-    display: "flex",
-    justifyContent: "space-between",
-    padding: "10px 20px",
-    backgroundColor: "#007bff",
-    color: "white",
-    borderRadius: "6px",
-    marginBottom: "30px"
+  title: {
+    fontSize: "1.8rem",
+    marginBottom: "20px"
   },
-  logo: {
-    fontWeight: "bold"
-  },
-  link: {
-    marginLeft: "15px",
-    background: "white",
-    border: "none",
-    padding: "6px 12px",
-    borderRadius: "4px",
-    cursor: "pointer"
-  },
-  content: {
-    textAlign: "center"
+  text: {
+    marginBottom: "10px",
+    fontSize: "1rem",
+    color: "#333"
   }
 };
 
