@@ -6,8 +6,12 @@ import Home from "./components/Home";
 import Catalog from "./components/Catalog";
 import Layout from "./components/Layout";
 import Cart from "./components/Cart";
-import { CartProvider } from "./context/CartContext";
+import Pedid from "./components/PedidConfirm";
+import Profile from "./components/auth/Profile";
+import ChangePassword from "./components/auth/ChangePassword";
+import Order from "./components/Order";
 
+import { CartProvider } from "./context/CartContext";
 
 function App() {
   return (
@@ -22,6 +26,11 @@ function App() {
             <Route path="/home" element={<Home />} />
             <Route path="/catalog" element={<Catalog />} />
             <Route path="/cart" element={<Cart />} />
+            <Route path="/pedidos" element={<Pedid />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/change-password" element={<ChangePassword />} />
+            <Route path="/order" element={<Order />} />
+
             {/* Aquí luego agregás /cart y /orders */}
           </Route>
         </Routes>
@@ -29,6 +38,5 @@ function App() {
     </CartProvider>
   );
 }
-
 
 export default App;

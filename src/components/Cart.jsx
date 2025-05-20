@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 const Cart = () => {
   const [carritoItems, setCarritoItems] = useState([]);
+  const [direccionEnvio, setDireccionEnvio] = useState("");
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -25,6 +26,13 @@ const Cart = () => {
           })
         );
         setCarritoItems(enriched);
+
+        // Obtener dirección actual del usuario
+        const resUser = await fetch(`${process.env.REACT_APP_AUTH_URL}/auth/secure`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const user = await resUser.json();
+        setDireccionEnvio(user.direccionEnvio || "");
         setLoading(false);
       })
       .catch((err) => {
@@ -46,6 +54,34 @@ const Cart = () => {
     }
   };
 
+  const confirmarPedido = async () => {
+    const token = localStorage.getItem("token");
+    const formData = new URLSearchParams();
+    formData.append("nuevaDireccionEnvio", direccionEnvio);
+  
+    try {
+      const res = await fetch(`${process.env.REACT_APP_CART_URL}/carrito/confirm`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: formData.toString(),
+      });
+  
+      if (!res.ok) throw new Error("Error al confirmar el pedido");
+  
+      alert("✅ ¡Pedido confirmado exitosamente!");
+      setCarritoItems([]);
+      // Podés redirigir a órdenes si querés
+      // navigate("/orders");
+    } catch (err) {
+      console.error(err);
+      alert("❌ No se pudo confirmar el pedido.");
+    }
+  };
+  
+
   const total = carritoItems.reduce((acc, item) => acc + item.precio * item.cantidad, 0);
 
   if (loading) return <div style={styles.center}>Cargando carrito...</div>;
@@ -54,6 +90,17 @@ const Cart = () => {
   return (
     <div style={styles.container}>
       <h2 style={styles.title}>🧺 Carrito de Compras</h2>
+
+      <div style={styles.addressBox}>
+        <label style={styles.addressLabel}>Dirección de envío:</label>
+        <input
+          type="text"
+          value={direccionEnvio}
+          onChange={(e) => setDireccionEnvio(e.target.value)}
+          style={styles.addressInput}
+        />
+      </div>
+
       <div style={{ overflowX: "auto" }}>
         <table style={styles.table}>
           <thead>
@@ -90,7 +137,12 @@ const Cart = () => {
           </tbody>
         </table>
       </div>
+
       <h3 style={styles.total}>Total: <span style={{ color: "#007bff" }}>₲ {total.toLocaleString()}</span></h3>
+
+      <button style={styles.confirmBtn} onClick={confirmarPedido}>
+        ✅ Confirmar Pedido
+      </button>
     </div>
   );
 };
@@ -106,6 +158,20 @@ const styles = {
     marginBottom: "1rem",
     textAlign: "center",
     color: "#333",
+  },
+  addressBox: {
+    marginBottom: "1rem",
+  },
+  addressLabel: {
+    display: "block",
+    fontWeight: "bold",
+    marginBottom: "0.3rem",
+  },
+  addressInput: {
+    width: "100%",
+    padding: "8px",
+    borderRadius: "5px",
+    border: "1px solid #ccc",
   },
   table: {
     width: "100%",
@@ -126,6 +192,17 @@ const styles = {
     borderRadius: "5px",
     cursor: "pointer",
     fontSize: "1rem",
+  },
+  confirmBtn: {
+    marginTop: "1.5rem",
+    backgroundColor: "#28a745",
+    color: "#fff",
+    border: "none",
+    padding: "10px 16px",
+    borderRadius: "6px",
+    fontSize: "1rem",
+    cursor: "pointer",
+    float: "right",
   },
   total: {
     textAlign: "right",

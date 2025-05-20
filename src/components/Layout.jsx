@@ -8,12 +8,32 @@ const Layout = () => {
 
   return (
     <div style={styles.layout}>
+      {/* Sidebar */}
       <aside style={styles.sidebar}>
         <div style={styles.sidebarHeader}>
-          <h2 style={styles.appName}>🛒 <strong>App Tienda</strong></h2>
+          <h2 style={styles.appName}>
+            🛒 <strong>App Tienda</strong>
+          </h2>
         </div>
         <ul style={styles.menu}>
-          <li style={styles.menuItem} onClick={() => navigate("/catalog")}>🛍️ Catálogo</li>
+          {/* Secciones principales */}
+          <li style={styles.menuItem} onClick={() => navigate("/home")}>
+            🏠 Inicio
+          </li>
+          <li style={styles.menuItem} onClick={() => navigate("/profile")}>
+            👤 Mi Perfil
+          </li>
+          <li
+            style={styles.menuItem}
+            onClick={() => navigate("/change-password")}
+          >
+            🔐 Cambiar Contraseña
+          </li>
+
+          {/* Funcionalidades del sistema */}
+          <li style={styles.menuItem} onClick={() => navigate("/catalog")}>
+            🛍️ Catálogo
+          </li>
 
           <li style={styles.menuItem} onClick={() => navigate("/cart")}>
             🧺 Carrito
@@ -22,15 +42,27 @@ const Layout = () => {
             )}
           </li>
 
-          <li style={styles.menuItem} onClick={() => navigate("/orders")}>📦 Órdenes</li>
+          <li style={styles.menuItem} onClick={() => navigate("/pedidos")}>
+            📦 Mis Pedidos
+          </li>
+          <li style={styles.menuItem} onClick={() => navigate("/order")}>
+            📋 Historial de Pedidos
+          </li>
 
-          <li style={styles.menuItem} onClick={() => {
-            localStorage.removeItem("token");
-            navigate("/");
-          }}>🚪 Salir</li>
+          {/* Salida */}
+          <li
+            style={{ ...styles.menuItem, color: "#ff4d4f", fontWeight: "bold" }}
+            onClick={() => {
+              localStorage.removeItem("token");
+              navigate("/");
+            }}
+          >
+            🚪 Cerrar sesión
+          </li>
         </ul>
       </aside>
 
+      {/* Área principal */}
       <div style={styles.main}>
         <header style={styles.header}>
           <h3>Panel Principal</h3>
@@ -50,7 +82,7 @@ const styles = {
     display: "flex",
     height: "100vh",
     fontFamily: "Segoe UI, sans-serif",
-    backgroundColor: "#f0f2f5"
+    backgroundColor: "#f0f2f5",
   },
   sidebar: {
     width: "220px",
@@ -65,7 +97,7 @@ const styles = {
     textAlign: "center",
   },
   appName: {
-    fontSize: "1.1rem",
+    fontSize: "1.2rem",
     margin: 0,
   },
   menu: {
@@ -76,9 +108,10 @@ const styles = {
   },
   menuItem: {
     padding: "10px 12px",
-    margin: "5px 0",
+    margin: "6px 0",
     borderRadius: "6px",
     cursor: "pointer",
+    transition: "background 0.2s",
     position: "relative",
   },
   badge: {
@@ -86,8 +119,8 @@ const styles = {
     color: "white",
     borderRadius: "50%",
     padding: "2px 6px",
-    fontSize: "0.8rem",
-    marginLeft: "8px",
+    fontSize: "0.75rem",
+    marginLeft: "6px",
   },
   main: {
     flexGrow: 1,
@@ -105,14 +138,14 @@ const styles = {
     padding: "20px",
     overflowY: "auto",
     flexGrow: 1,
-    backgroundColor: "#f0f2f5"
+    backgroundColor: "#f0f2f5",
   },
   contentBox: {
     backgroundColor: "white",
     padding: "20px",
     borderRadius: "8px",
-    boxShadow: "0 2px 6px rgba(0,0,0,0.05)"
-  }
+    boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
+  },
 };
 
 export default Layout;
