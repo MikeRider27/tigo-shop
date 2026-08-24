@@ -3,45 +3,52 @@ package com.cart.cart_service.controller;
 import com.cart.cart_service.model.Carrito;
 import com.cart.cart_service.model.CarritoItem;
 import com.cart.cart_service.service.CarritoService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
 
+import java.util.Collections;
 import java.util.List;
 
 @RestController
 @RequestMapping("/carrito")
+@Validated
 public class CarritoController {
 
-    @Autowired
-    private CarritoService carritoService;
+    private final CarritoService carritoService;
+
+    public CarritoController(CarritoService carritoService) {
+        this.carritoService = carritoService;
+    }
 
     @PostMapping("/agregar")
     public ResponseEntity<?> addItem(Authentication auth,
-            @RequestParam Long articuloId,
-            @RequestParam int cantidad) {
+            @RequestParam @Positive(message = "articuloId debe ser positivo") Long articuloId,
+            @RequestParam @Positive(message = "cantidad debe ser positiva") int cantidad) {
         String usuarioEmail = auth.getName();
         carritoService.agregarItem(usuarioEmail, articuloId, cantidad);
-        return ResponseEntity.ok("Artículo agregado al carrito");
+        return ResponseEntity.ok(Collections.singletonMap("message", "Artículo agregado al carrito"));
     }
 
     @DeleteMapping("/remove")
     public ResponseEntity<?> removeItem(Authentication auth,
-            @RequestParam Long itemId) {
+            @RequestParam @Positive(message = "itemId debe ser positivo") Long itemId) {
         String usuarioEmail = auth.getName();
         carritoService.eliminarItemDelUsuario(usuarioEmail, itemId);
-        return ResponseEntity.ok("Artículo eliminado del carrito");
+        return ResponseEntity.ok(Collections.singletonMap("message", "Artículo eliminado del carrito"));
     }
 
     @PostMapping("/confirm")
     public ResponseEntity<?> confirm(@RequestHeader("Authorization") String authHeader,
-            @RequestParam String nuevaDireccionEnvio,
+            @RequestParam @NotBlank(message = "nuevaDireccionEnvio es obligatoria") String nuevaDireccionEnvio,
             Authentication auth) {
         String token = authHeader.replace("Bearer ", "");
         String usuarioEmail = auth.getName();
         carritoService.confirmarPedido(usuarioEmail, nuevaDireccionEnvio, token);
-        return ResponseEntity.ok("Carrito confirmado y orden enviada");
+        return ResponseEntity.ok(Collections.singletonMap("message", "Carrito confirmado y orden enviada"));
     }
 
     @GetMapping("/pedidos")

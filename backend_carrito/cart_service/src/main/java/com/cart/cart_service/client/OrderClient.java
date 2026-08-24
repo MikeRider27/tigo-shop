@@ -1,5 +1,6 @@
 package com.cart.cart_service.client;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -10,7 +11,11 @@ import java.util.Map;
 public class OrderClient {
 
     private final RestTemplate restTemplate = new RestTemplate();
-    private final String ORDER_URL = "http://localhost:8084/ordenes"; // puerto del order_service
+    private final String orderUrl;
+
+    public OrderClient(@Value("${services.order.url}") String orderServiceUrl) {
+        this.orderUrl = orderServiceUrl + "/ordenes";
+    }
 
     public ResponseEntity<String> enviarOrden(Map<String, Object> ordenJson, String token) {
         HttpHeaders headers = new HttpHeaders();
@@ -20,10 +25,10 @@ public class OrderClient {
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(ordenJson, headers);
 
         return restTemplate.exchange(
-                ORDER_URL,
+                orderUrl,
                 HttpMethod.POST,
                 entity,
                 String.class
         );
     }
-} 
+}

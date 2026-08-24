@@ -1,23 +1,25 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useCart } from "../context/CartContext";
 
 const Cart = () => {
   const [carritoItems, setCarritoItems] = useState([]);
   const [direccionEnvio, setDireccionEnvio] = useState("");
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { refrescarCantidad } = useCart();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) return navigate("/");
 
-    fetch(`${process.env.REACT_APP_CART_URL}/carrito`, {
+    fetch(`${process.env.REACT_APP_CART_URL}/carrito/items`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
-      .then(async (data) => {
+      .then(async (items) => {
         const enriched = await Promise.all(
-          data.items.map(async (item) => {
+          items.map(async (item) => {
             const res = await fetch(`${process.env.REACT_APP_CATALOG_URL}/articulos/${item.articuloId}`, {
               headers: { Authorization: `Bearer ${token}` },
             });
@@ -41,14 +43,15 @@ const Cart = () => {
       });
   }, [navigate]);
 
-  const eliminarDelCarrito = async (articuloId) => {
+  const eliminarDelCarrito = async (itemId) => {
     const token = localStorage.getItem("token");
     try {
-      await fetch(`${process.env.REACT_APP_CART_URL}/carrito/${articuloId}`, {
+      await fetch(`${process.env.REACT_APP_CART_URL}/carrito/remove?itemId=${itemId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
-      setCarritoItems(prev => prev.filter(item => item.articuloId !== articuloId));
+      setCarritoItems(prev => prev.filter(item => item.id !== itemId));
+      refrescarCantidad();
     } catch (err) {
       alert("Error al eliminar artículo.");
     }
@@ -73,6 +76,7 @@ const Cart = () => {
   
       alert("✅ ¡Pedido confirmado exitosamente!");
       setCarritoItems([]);
+      refrescarCantidad();
       // Podés redirigir a órdenes si querés
       // navigate("/orders");
     } catch (err) {
@@ -115,7 +119,7 @@ const Cart = () => {
           </thead>
           <tbody>
             {carritoItems.map((item) => (
-              <tr key={item.articuloId}>
+              <tr key={item.id}>
                 <td>
                   <img
                     src={item.imagenUrl || "https://via.placeholder.com/60"}
@@ -128,7 +132,7 @@ const Cart = () => {
                 <td>{item.cantidad}</td>
                 <td>₲ {(item.precio * item.cantidad).toLocaleString()}</td>
                 <td>
-                  <button style={styles.deleteBtn} onClick={() => eliminarDelCarrito(item.articuloId)}>
+                  <button style={styles.deleteBtn} onClick={() => eliminarDelCarrito(item.id)}>
                     ❌
                   </button>
                 </td>

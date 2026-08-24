@@ -1,9 +1,95 @@
 services:
+  auth-service:
+    build:
+      context: ./backend_carrito/auth-service
+    container_name: auth-service
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      DB_HOST: ${DB_HOST:-192.168.11.220}
+      DB_PORT: ${DB_PORT:-5436}
+      DB_NAME: auth_db
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-123}
+      JWT_SECRET: ${JWT_SECRET:-clave_super_secreta_de_al_menos_32_bytes_para_seguridad}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:3001,http://192.168.11.220:3000,http://192.168.11.220:3001}
+    networks:
+      - app
+
+  catalog-service:
+    build:
+      context: ./backend_carrito/catalog_service
+    container_name: catalog-service
+    restart: always
+    ports:
+      - "8082:8082"
+    environment:
+      DB_HOST: ${DB_HOST:-192.168.11.220}
+      DB_PORT: ${DB_PORT:-5436}
+      DB_NAME: catalog_db
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-123}
+      JWT_SECRET: ${JWT_SECRET:-clave_super_secreta_de_al_menos_32_bytes_para_seguridad}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:3001,http://192.168.11.220:3000,http://192.168.11.220:3001}
+      AUTH_SERVICE_URL: http://auth-service:8081
+    depends_on:
+      - auth-service
+    networks:
+      - app
+
+  cart-service:
+    build:
+      context: ./backend_carrito/cart_service
+    container_name: cart-service
+    restart: always
+    ports:
+      - "8093:8083"
+    environment:
+      DB_HOST: ${DB_HOST:-192.168.11.220}
+      DB_PORT: ${DB_PORT:-5436}
+      DB_NAME: cart_db
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-123}
+      JWT_SECRET: ${JWT_SECRET:-clave_super_secreta_de_al_menos_32_bytes_para_seguridad}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:3001,http://192.168.11.220:3000,http://192.168.11.220:3001}
+      AUTH_SERVICE_URL: http://auth-service:8081
+      CATALOG_SERVICE_URL: http://catalog-service:8082
+      ORDER_SERVICE_URL: http://order-service:8084
+    depends_on:
+      - auth-service
+      - catalog-service
+      - order-service
+    networks:
+      - app
+
+  order-service:
+    build:
+      context: ./backend_carrito/order_service
+    container_name: order-service
+    restart: always
+    ports:
+      - "8084:8084"
+    environment:
+      DB_HOST: ${DB_HOST:-192.168.11.220}
+      DB_PORT: ${DB_PORT:-5436}
+      DB_NAME: order_db
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-123}
+      JWT_SECRET: ${JWT_SECRET:-clave_super_secreta_de_al_menos_32_bytes_para_seguridad}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:3001,http://192.168.11.220:3000,http://192.168.11.220:3001}
+      AUTH_SERVICE_URL: http://auth-service:8081
+    depends_on:
+      - auth-service
+    networks:
+      - app
+
   cart-app:
     build:
       context: .
       dockerfile: Dockerfile
-      args:      
+      args:
         REACT_APP_AUTH_URL: ${REACT_APP_AUTH_URL}
         REACT_APP_CATALOG_URL: ${REACT_APP_CATALOG_URL}
         REACT_APP_CART_URL: ${REACT_APP_CART_URL}
@@ -12,12 +98,18 @@ services:
     restart: always
     volumes:
       - ./:/app
+      - /app/node_modules
     ports:
-      - "3000:3000"
+      - "3001:3000"
     networks:
       - app
     env_file:
       - .env
+    depends_on:
+      - auth-service
+      - catalog-service
+      - cart-service
+      - order-service
 
 networks:
   app:

@@ -22,10 +22,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final UsuarioRepository usuarioRepository;
     private final AuthService authService;
+    private final JwtUtil jwtUtil;
 
-    public JwtAuthenticationFilter(UsuarioRepository usuarioRepository, @Lazy AuthService authService) {
+    public JwtAuthenticationFilter(UsuarioRepository usuarioRepository, @Lazy AuthService authService, JwtUtil jwtUtil) {
         this.usuarioRepository = usuarioRepository;
         this.authService = authService;
+        this.jwtUtil = jwtUtil;
     }
 
     @Override
@@ -37,12 +39,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (header != null && header.startsWith("Bearer ")) {
             String token = header.replace("Bearer ", "");
             try {
-                String email = JwtUtil.getEmailFromToken(token);
+                String email = jwtUtil.getEmailFromToken(token);
 
                 if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     Usuario usuario = authService.findByEmail(email);
 
-                    if (usuario != null && JwtUtil.validateToken(token) && token.equals(usuario.getCurrentToken())) {
+                    if (usuario != null && jwtUtil.validateToken(token) && token.equals(usuario.getCurrentToken())) {
                         UsernamePasswordAuthenticationToken authentication =
                                 new UsernamePasswordAuthenticationToken(usuario, null, new ArrayList<>());
                         SecurityContextHolder.getContext().setAuthentication(authentication);

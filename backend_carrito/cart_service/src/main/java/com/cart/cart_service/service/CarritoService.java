@@ -2,6 +2,9 @@ package com.cart.cart_service.service;
 
 import com.cart.cart_service.client.CatalogClient;
 import com.cart.cart_service.client.OrderClient;
+import com.cart.cart_service.exception.CarritoNotFoundException;
+import com.cart.cart_service.exception.ItemNotFoundException;
+import com.cart.cart_service.exception.ItemNotOwnedException;
 import com.cart.cart_service.model.Carrito;
 import com.cart.cart_service.model.CarritoItem;
 import com.cart.cart_service.repository.CarritoItemRepository;
@@ -64,10 +67,10 @@ public class CarritoService {
         Carrito carrito = obtenerCarritoActivo(email);
 
         CarritoItem item = itemRepo.findById(itemId)
-                .orElseThrow(() -> new RuntimeException("Ítem no encontrado"));
+                .orElseThrow(() -> new ItemNotFoundException(itemId));
 
         if (!item.getCarrito().getId().equals(carrito.getId())) {
-            throw new RuntimeException("Ítem no pertenece al usuario");
+            throw new ItemNotOwnedException();
         }
 
         itemRepo.delete(item);
@@ -113,7 +116,7 @@ public class CarritoService {
 
     public List<CarritoItem> verItems(String usuarioEmail) {
         Carrito carrito = carritoRepo.findByUsuarioEmailAndConfirmadoFalse(usuarioEmail)
-                .orElseThrow(() -> new RuntimeException("Carrito no encontrado"));
+                .orElseThrow(CarritoNotFoundException::new);
         return itemRepo.findByCarrito(carrito);
     }
 

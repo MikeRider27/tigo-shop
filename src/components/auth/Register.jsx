@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 const schema = Yup.object().shape({
   nombres: Yup.string().required("Campo obligatorio"),
   apellidos: Yup.string().required("Campo obligatorio"),
-  direccion: Yup.string().required("Campo obligatorio"),
+  direccionEnvio: Yup.string().required("Campo obligatorio"),
   email: Yup.string().email("Formato inválido").required("Campo obligatorio"),
   fechaNacimiento: Yup.date()
     .required("Campo obligatorio")
@@ -52,8 +52,8 @@ const Register = () => {
         <input placeholder="Apellidos" {...register("apellidos")} style={styles.input} />
         <p style={styles.error}>{errors.apellidos?.message}</p>
 
-        <input placeholder="Dirección de Envío" {...register("direccion")} style={styles.input} />
-        <p style={styles.error}>{errors.direccion?.message}</p>
+        <input placeholder="Dirección de Envío" {...register("direccionEnvio")} style={styles.input} />
+        <p style={styles.error}>{errors.direccionEnvio?.message}</p>
 
         <input type="email" placeholder="Email" {...register("email")} style={styles.input} />
         <p style={styles.error}>{errors.email?.message}</p>

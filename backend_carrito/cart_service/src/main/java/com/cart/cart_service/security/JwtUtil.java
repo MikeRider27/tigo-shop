@@ -1,32 +1,35 @@
 package com.cart.cart_service.security;
 
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.security.Key;
-import java.util.Base64;
 
+@Component
 public class JwtUtil {
-    // El mismo secreto usado en auth_service
-    private static final String SECRET = "clave_super_secreta_de_al_menos_32_bytes_para_seguridad"; // 256 bits (32 chars)
 
-    private static final Key SIGNING_KEY = Keys.hmacShaKeyFor(SECRET.getBytes());
+    private final Key key;
 
-    public static String getEmailFromToken(String token) {
+    public JwtUtil(@Value("${jwt.secret}") String secret) {
+        this.key = Keys.hmacShaKeyFor(secret.getBytes());
+    }
+
+    public String getEmailFromToken(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(SIGNING_KEY)
+                .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
     }
 
-    public static boolean validateToken(String token) {
+    public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
-                .setSigningKey(SIGNING_KEY)
+                .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token);
             return true;

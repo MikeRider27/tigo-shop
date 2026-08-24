@@ -1,8 +1,8 @@
 package com.cart.catalog_service.controller;
 
+import com.cart.catalog_service.exception.ArticuloNotFoundException;
 import com.cart.catalog_service.model.Articulo;
 import com.cart.catalog_service.repository.ArticuloRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,8 +11,11 @@ import java.util.List;
 @RequestMapping("/articulos")
 public class ArticuloController {
 
-    @Autowired
-    private ArticuloRepository articuloRepository;
+    private final ArticuloRepository articuloRepository;
+
+    public ArticuloController(ArticuloRepository articuloRepository) {
+        this.articuloRepository = articuloRepository;
+    }
 
     @GetMapping
     public List<Articulo> listarTodos() {
@@ -22,7 +25,7 @@ public class ArticuloController {
     @GetMapping("/{id}")
     public Articulo obtenerPorId(@PathVariable Long id) {
         return articuloRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Artículo no encontrado: " + id));
+                .orElseThrow(() -> new ArticuloNotFoundException(id));
     }
 
 }

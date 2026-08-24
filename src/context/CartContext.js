@@ -1,9 +1,28 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useCallback } from "react";
 
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
   const [cantidadTotal, setCantidadTotal] = useState(0);
+
+  const refrescarCantidad = useCallback(async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setCantidadTotal(0);
+      return;
+    }
+
+    try {
+      const res = await fetch(`${process.env.REACT_APP_CART_URL}/carrito/items`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) return;
+      const items = await res.json();
+      setCantidadTotal(items.reduce((acc, item) => acc + item.cantidad, 0));
+    } catch (error) {
+      console.error("Error al obtener el carrito:", error);
+    }
+  }, []);
 
   const agregarAlCarrito = async (articuloId, cantidad = 1) => {
     const token = localStorage.getItem("token");
@@ -21,14 +40,14 @@ export const CartProvider = ({ children }) => {
         }),
       });
 
-      setCantidadTotal((prev) => prev + cantidad);
+      await refrescarCantidad();
     } catch (error) {
       console.error("Error al agregar al carrito:", error);
     }
   };
 
   return (
-    <CartContext.Provider value={{ cantidadTotal, agregarAlCarrito }}>
+    <CartContext.Provider value={{ cantidadTotal, agregarAlCarrito, refrescarCantidad }}>
       {children}
     </CartContext.Provider>
   );

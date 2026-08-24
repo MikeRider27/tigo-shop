@@ -1,5 +1,6 @@
 package com.cart.order_service.service;
 
+import com.cart.order_service.exception.OrdenNotFoundException;
 import com.cart.order_service.model.Orden;
 import com.cart.order_service.model.OrdenItem;
 import com.cart.order_service.repository.OrdenRepository;
@@ -33,6 +34,10 @@ public class OrdenService {
     }
 
     public Orden obtenerOrdenPorNumero(String numeroOrden) {
-        return ordenRepository.findByNumeroOrden(numeroOrden);
+        Orden orden = ordenRepository.findByNumeroOrden(numeroOrden);
+        if (orden == null) {
+            throw new OrdenNotFoundException(numeroOrden);
+        }
+        return orden;
     }
 }

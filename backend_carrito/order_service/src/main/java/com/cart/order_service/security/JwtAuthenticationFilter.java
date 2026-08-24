@@ -18,9 +18,11 @@ import java.util.Collections;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final AuthClient authClient;
+    private final JwtUtil jwtUtil;
 
-    public JwtAuthenticationFilter(AuthClient authClient) {
+    public JwtAuthenticationFilter(AuthClient authClient, JwtUtil jwtUtil) {
         this.authClient = authClient;
+        this.jwtUtil = jwtUtil;
     }
 
     @Override
@@ -35,7 +37,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 // Validar con el auth-service
                 if (authClient.isTokenValid(token)) {
-                    String email = JwtUtil.getEmailFromToken(token);
+                    String email = jwtUtil.getEmailFromToken(token);
 
                     if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                         UsernamePasswordAuthenticationToken authentication =
