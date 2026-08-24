@@ -115,4 +115,12 @@ cd backend_carrito/<servicio>
 
 ---
 
-© 2025 - Proyecto desarrollado por Miguel Angel Villalba Cabañas
+## 👨‍💻 Autor
+
+Miguel Villalba
+Desarrollador Full Stack
+✉️ mike.mavc27@gmail.com
+
+## 📄 Licencia
+
+Este proyecto está bajo la licencia MIT.
