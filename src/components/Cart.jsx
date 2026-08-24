@@ -16,8 +16,18 @@ const Cart = () => {
     fetch(`${process.env.REACT_APP_CART_URL}/carrito/items`, {
       headers: { Authorization: `Bearer ${token}` },
     })
-      .then((res) => res.json())
+      .then((res) => {
+        if (res.status === 404) return []; // no hay carrito activo: carrito vacío
+        if (!res.ok) throw new Error("No se pudo cargar el carrito");
+        return res.json();
+      })
       .then(async (items) => {
+        if (items.length === 0) {
+          setCarritoItems([]);
+          setLoading(false);
+          return;
+        }
+
         const enriched = await Promise.all(
           items.map(async (item) => {
             const res = await fetch(`${process.env.REACT_APP_CATALOG_URL}/articulos/${item.articuloId}`, {

@@ -16,7 +16,11 @@ export const CartProvider = ({ children }) => {
       const res = await fetch(`${process.env.REACT_APP_CART_URL}/carrito/items`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) return;
+      if (!res.ok) {
+        // 404 = no hay carrito activo (vacío o ya confirmado)
+        setCantidadTotal(0);
+        return;
+      }
       const items = await res.json();
       setCantidadTotal(items.reduce((acc, item) => acc + item.cantidad, 0));
     } catch (error) {
