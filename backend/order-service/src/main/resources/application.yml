@@ -1,0 +1,43 @@
+server:
+  port: 8080
+  shutdown: graceful
+  forward-headers-strategy: framework   # respeta X-Forwarded-* del gateway (header Location correcto)
+
+spring:
+  application:
+    name: order-service
+  datasource:
+    url: ${DB_URL:jdbc:mariadb://localhost:3306/orders_db}
+    username: ${DB_USER:orders_svc}
+    password: ${DB_PASSWORD}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  flyway:
+    enabled: true
+
+security:
+  jwt:
+    secret: ${JWT_SECRET}
+
+app:
+  catalog:
+    base-url: ${CATALOG_URL:http://localhost:8082}
+  users:
+    base-url: ${USERS_URL:http://localhost:8081}
+  security:
+    internal-api-key: ${INTERNAL_API_KEY}
+    # Cuánto tarda, como máximo, en rechazarse aquí un token revocado (cambio de contraseña, cuenta eliminada).
+    token-version-cache-ttl: ${TOKEN_VERSION_CACHE_TTL:PT5S}
+  orders:
+    # Simula la logística: cada intervalo, las órdenes avanzan un estado
+    # (CONFIRMADA -> EN_PREPARACION -> ENVIADA -> ENTREGADA). Desactivar en producción.
+    auto-advance: ${ORDERS_AUTO_ADVANCE:true}
+    status-advance-interval: ${ORDERS_STATUS_ADVANCE_INTERVAL:PT2M}
+
+management:
+  endpoints.web.exposure.include: health
+  endpoint.health.probes.enabled: true
