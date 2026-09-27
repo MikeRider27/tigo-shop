@@ -1,116 +1,122 @@
+name: tigo-shop
+
+# Topología:
+#   navegador ──► frontend (nginx: SPA + API gateway) ──► user-service / catalog-service / order-service ──► MariaDB
+#   order-service ──(API interna)──► catalog-service
+# Solo el frontend (y Mailpit, para ver los correos de la demo) se publican en el host.
+
+x-service-env: &service-env
+  JWT_SECRET: ${JWT_SECRET:?Defina JWT_SECRET en .env (cp .env.example .env)}
+  JWT_EXPIRATION_MINUTES: ${JWT_EXPIRATION_MINUTES:-120}
+  INTERNAL_API_KEY: ${INTERNAL_API_KEY:?Defina INTERNAL_API_KEY en .env}
+  TZ: UTC
+
 services:
-  auth-service:
-    build:
-      context: ./backend_carrito/auth-service
-    container_name: auth-service
-    restart: always
-    ports:
-      - "8081:8081"
+  db:
+    image: mariadb:11.4
+    restart: unless-stopped
     environment:
-      DB_HOST: ${DB_HOST:-192.168.11.220}
-      DB_PORT: ${DB_PORT:-5436}
-      DB_NAME: auth_db
-      DB_USERNAME: ${DB_USERNAME:-postgres}
-      DB_PASSWORD: ${DB_PASSWORD:-123}
-      JWT_SECRET: ${JWT_SECRET:-clave_super_secreta_de_al_menos_32_bytes_para_seguridad}
-      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
-      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:3001,http://192.168.11.220:3000,http://192.168.11.220:3001}
-    networks:
-      - app
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:?Defina MARIADB_ROOT_PASSWORD en .env}
+      USERS_DB_PASSWORD: ${USERS_DB_PASSWORD:?}
+      CATALOG_DB_PASSWORD: ${CATALOG_DB_PASSWORD:?}
+      ORDERS_DB_PASSWORD: ${ORDERS_DB_PASSWORD:?}
+    volumes:
+      - db-data:/var/lib/mysql
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  mailpit:
+    image: axllent/mailpit:v1.21
+    restart: unless-stopped
+    ports:
+      - "8025:8025"   # bandeja de entrada web para ver el correo de recuperación de contraseña
+
+  user-service:
+    build:
+      context: ./backend
+      args:
+        SERVICE: user-service
+    restart: unless-stopped
+    environment:
+      <<: *service-env
+      DB_URL: jdbc:mariadb://db:3306/users_db
+      DB_USER: users_svc
+      DB_PASSWORD: ${USERS_DB_PASSWORD}
+      MAIL_HOST: mailpit
+      MAIL_PORT: 1025
+      FRONTEND_URL: http://localhost:${APP_PORT:-8090}
+    depends_on:
+      db:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
 
   catalog-service:
     build:
-      context: ./backend_carrito/catalog_service
-    container_name: catalog-service
-    restart: always
-    ports:
-      - "8082:8082"
+      context: ./backend
+      args:
+        SERVICE: catalog-service
+    restart: unless-stopped
     environment:
-      DB_HOST: ${DB_HOST:-192.168.11.220}
-      DB_PORT: ${DB_PORT:-5436}
-      DB_NAME: catalog_db
-      DB_USERNAME: ${DB_USERNAME:-postgres}
-      DB_PASSWORD: ${DB_PASSWORD:-123}
-      JWT_SECRET: ${JWT_SECRET:-clave_super_secreta_de_al_menos_32_bytes_para_seguridad}
-      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:3001,http://192.168.11.220:3000,http://192.168.11.220:3001}
-      AUTH_SERVICE_URL: http://auth-service:8081
+      <<: *service-env
+      DB_URL: jdbc:mariadb://db:3306/catalog_db
+      DB_USER: catalog_svc
+      DB_PASSWORD: ${CATALOG_DB_PASSWORD}
     depends_on:
-      - auth-service
-    networks:
-      - app
-
-  cart-service:
-    build:
-      context: ./backend_carrito/cart_service
-    container_name: cart-service
-    restart: always
-    ports:
-      - "8093:8083"
-    environment:
-      DB_HOST: ${DB_HOST:-192.168.11.220}
-      DB_PORT: ${DB_PORT:-5436}
-      DB_NAME: cart_db
-      DB_USERNAME: ${DB_USERNAME:-postgres}
-      DB_PASSWORD: ${DB_PASSWORD:-123}
-      JWT_SECRET: ${JWT_SECRET:-clave_super_secreta_de_al_menos_32_bytes_para_seguridad}
-      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:3001,http://192.168.11.220:3000,http://192.168.11.220:3001}
-      AUTH_SERVICE_URL: http://auth-service:8081
-      CATALOG_SERVICE_URL: http://catalog-service:8082
-      ORDER_SERVICE_URL: http://order-service:8084
-    depends_on:
-      - auth-service
-      - catalog-service
-      - order-service
-    networks:
-      - app
+      db:
+        condition: service_healthy
 
   order-service:
     build:
-      context: ./backend_carrito/order_service
-    container_name: order-service
-    restart: always
-    ports:
-      - "8084:8084"
-    environment:
-      DB_HOST: ${DB_HOST:-192.168.11.220}
-      DB_PORT: ${DB_PORT:-5436}
-      DB_NAME: order_db
-      DB_USERNAME: ${DB_USERNAME:-postgres}
-      DB_PASSWORD: ${DB_PASSWORD:-123}
-      JWT_SECRET: ${JWT_SECRET:-clave_super_secreta_de_al_menos_32_bytes_para_seguridad}
-      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:3001,http://192.168.11.220:3000,http://192.168.11.220:3001}
-      AUTH_SERVICE_URL: http://auth-service:8081
-    depends_on:
-      - auth-service
-    networks:
-      - app
-
-  cart-app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+      context: ./backend
       args:
-        REACT_APP_AUTH_URL: ${REACT_APP_AUTH_URL}
-        REACT_APP_CATALOG_URL: ${REACT_APP_CATALOG_URL}
-        REACT_APP_CART_URL: ${REACT_APP_CART_URL}
-        REACT_APP_ORDER_URL: ${REACT_APP_ORDER_URL}
-    container_name: cart-app
-    restart: always
-    volumes:
-      - ./:/app
-      - /app/node_modules
-    ports:
-      - "3001:3000"
-    networks:
-      - app
-    env_file:
-      - .env
+        SERVICE: order-service
+    restart: unless-stopped
+    environment:
+      <<: *service-env
+      DB_URL: jdbc:mariadb://db:3306/orders_db
+      DB_USER: orders_svc
+      DB_PASSWORD: ${ORDERS_DB_PASSWORD}
+      CATALOG_URL: http://catalog-service:8080
+      USERS_URL: http://user-service:8080
+      ORDERS_STATUS_ADVANCE_INTERVAL: ${ORDERS_STATUS_ADVANCE_INTERVAL:-PT2M}
     depends_on:
-      - auth-service
-      - catalog-service
-      - cart-service
-      - order-service
+      db:
+        condition: service_healthy
+      catalog-service:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
 
-networks:
-  app:
-    driver: bridge
+  frontend:
+    build:
+      context: ./frontend
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8090}:8080"
+    depends_on:
+      user-service:
+        condition: service_healthy
+      catalog-service:
+        condition: service_healthy
+      order-service:
+        condition: service_healthy
+
+  # Prueba end-to-end:  docker compose --profile test run --rm smoke-test
+  smoke-test:
+    image: alpine:3.20
+    profiles: ["test"]
+    volumes:
+      - ./scripts:/scripts:ro
+    entrypoint: ["sh", "-c", "apk add --no-cache -q bash curl jq && bash /scripts/smoke-test.sh"]
+    depends_on:
+      frontend:
+        condition: service_started
+
+volumes:
+  db-data:
