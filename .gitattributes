@@ -1,0 +1,4 @@
+# Scripts y archivos usados dentro de contenedores Linux deben mantener LF
+*.sh text eol=lf
+Dockerfile text eol=lf
+*.conf text eol=lf
