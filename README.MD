@@ -173,4 +173,6 @@ mike.mavc27@gmail.com
 
 ## Licencia
 
-Este proyecto está bajo la licencia MIT.
+Este proyecto está bajo la licencia MIT. Consultá el archivo [LICENSE](LICENSE) para más detalles.
+
+Copyright (c) 2026 Miguel Villalba.
