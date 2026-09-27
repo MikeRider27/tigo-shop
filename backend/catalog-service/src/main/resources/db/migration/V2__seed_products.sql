@@ -1,0 +1,20 @@
+-- Catálogo fijo (el enunciado indica que no se requiere mantenimiento de artículos).
+INSERT INTO products (sku, name, description, category, price, stock, image_url) VALUES
+('FUT-BAL-01', 'Balón de fútbol Pro Match', 'Balón talla 5 termosellado, 32 paneles, ideal para césped natural y sintético.', 'Fútbol', 39.90, 25, '/img/products/FUT-BAL-01.svg'),
+('FUT-TAC-02', 'Tacos Velocity FG', 'Zapatos de fútbol para terreno firme con suela de TPU y upper sintético ligero.', 'Fútbol', 89.00, 12, '/img/products/FUT-TAC-02.svg'),
+('FUT-GUA-03', 'Guantes de portero Grip X', 'Guantes con palma de látex alemán de 4 mm y protección de dedos.', 'Fútbol', 34.50, 18, '/img/products/FUT-GUA-03.svg'),
+('FUT-CAM-04', 'Camiseta de entrenamiento DryFit', 'Camiseta transpirable de secado rápido para entrenamientos intensos.', 'Fútbol', 24.99, 40, '/img/products/FUT-CAM-04.svg'),
+('BAS-BAL-01', 'Balón de baloncesto Street', 'Balón talla 7 de caucho resistente para canchas exteriores.', 'Baloncesto', 29.90, 30, '/img/products/BAS-BAL-01.svg'),
+('BAS-ZAP-02', 'Zapatillas Jump High', 'Zapatillas de caña alta con amortiguación en talón y buena tracción.', 'Baloncesto', 119.00, 8, '/img/products/BAS-ZAP-02.svg'),
+('TEN-RAQ-01', 'Raqueta de tenis Ace 100', 'Raqueta de grafito, 300 g, cabeza de 100 in², balance neutro.', 'Tenis', 149.00, 6, '/img/products/TEN-RAQ-01.svg'),
+('TEN-PEL-02', 'Tubo de pelotas de tenis (x3)', 'Pelotas presurizadas aprobadas para torneos, todo tipo de superficie.', 'Tenis', 8.50, 60, '/img/products/TEN-PEL-02.svg'),
+('RUN-ZAP-01', 'Tenis de running CloudRun', 'Tenis de running con espuma reactiva y malla transpirable.', 'Running', 99.90, 15, '/img/products/RUN-ZAP-01.svg'),
+('RUN-REL-02', 'Reloj deportivo GPS Pace', 'Reloj con GPS, monitor de ritmo cardíaco y 7 días de batería.', 'Running', 179.00, 5, '/img/products/RUN-REL-02.svg'),
+('RUN-BOT-03', 'Botella de hidratación 750 ml', 'Botella libre de BPA con válvula antigoteo.', 'Running', 12.00, 50, '/img/products/RUN-BOT-03.svg'),
+('FIT-MAN-01', 'Set de mancuernas ajustables 20 kg', 'Par de mancuernas con discos intercambiables y agarre antideslizante.', 'Fitness', 79.00, 10, '/img/products/FIT-MAN-01.svg'),
+('FIT-YOG-02', 'Mat de yoga EcoGrip', 'Mat de 6 mm de TPE ecológico, antideslizante, con correa de transporte.', 'Fitness', 27.50, 22, '/img/products/FIT-YOG-02.svg'),
+('FIT-CUE-03', 'Cuerda para saltar Speed', 'Cuerda de acero recubierto con rodamientos y longitud ajustable.', 'Fitness', 14.90, 35, '/img/products/FIT-CUE-03.svg'),
+('CIC-CAS-01', 'Casco de ciclismo AeroLite', 'Casco ventilado con sistema de ajuste y certificación CE.', 'Ciclismo', 64.00, 9, '/img/products/CIC-CAS-01.svg'),
+('CIC-GUA-02', 'Guantes de ciclismo Gel', 'Guantes de medio dedo con almohadillas de gel.', 'Ciclismo', 19.90, 20, '/img/products/CIC-GUA-02.svg'),
+('NAT-GOG-01', 'Goggles de natación Clear', 'Lentes antiempañante con protección UV y correa de silicona.', 'Natación', 16.50, 28, '/img/products/NAT-GOG-01.svg'),
+('NAT-GOR-02', 'Gorro de natación de silicona', 'Gorro resistente al cloro, talla única.', 'Natación', 9.90, 0, '/img/products/NAT-GOR-02.svg');

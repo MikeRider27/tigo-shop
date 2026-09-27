@@ -1,0 +1,33 @@
+server:
+  port: 8080
+  shutdown: graceful
+
+spring:
+  application:
+    name: catalog-service
+  datasource:
+    url: ${DB_URL:jdbc:mariadb://localhost:3306/catalog_db}
+    username: ${DB_USER:catalog_svc}
+    password: ${DB_PASSWORD}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  flyway:
+    enabled: true
+
+security:
+  jwt:
+    secret: ${JWT_SECRET}
+
+app:
+  security:
+    internal-api-key: ${INTERNAL_API_KEY}
+    # El catálogo es público: se puede navegar sin iniciar sesión.
+    public-paths: /api/products/**
+
+management:
+  endpoints.web.exposure.include: health
+  endpoint.health.probes.enabled: true
