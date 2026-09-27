@@ -1,0 +1,39 @@
+server:
+  port: 8080
+  shutdown: graceful
+
+spring:
+  application:
+    name: user-service
+  datasource:
+    url: ${DB_URL:jdbc:mariadb://localhost:3306/users_db}
+    username: ${DB_USER:users_svc}
+    password: ${DB_PASSWORD}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate   # el esquema lo gestiona Flyway
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  flyway:
+    enabled: true
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+
+security:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration-minutes: ${JWT_EXPIRATION_MINUTES:120}
+
+app:
+  frontend-url: ${FRONTEND_URL:http://localhost:8090}
+  mail-from: no-reply@tigo-shop.local
+  password-reset-ttl-minutes: 30
+  security:
+    internal-api-key: ${INTERNAL_API_KEY}
+    public-paths: /api/auth/**
+
+management:
+  endpoints.web.exposure.include: health
+  endpoint.health.probes.enabled: true
